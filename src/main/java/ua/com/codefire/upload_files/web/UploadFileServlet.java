@@ -9,6 +9,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
@@ -55,7 +57,13 @@ public class UploadFileServlet extends HttpServlet {
      */
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        getServletContext().getRequestDispatcher("/WEB-INF/views/upload_file.jsp").forward(request, response);
+        String param;
+        param = request.getParameter("id");
+        if (param == null || param.trim().isEmpty()) {
+            getServletContext().getRequestDispatcher("/WEB-INF/views/upload_file.jsp").forward(request, response);
+        } else {
+            getServletContext().getRequestDispatcher("/DownloadFileServlet").forward(request, response);
+        }
     }
 
     /**
@@ -71,7 +79,7 @@ public class UploadFileServlet extends HttpServlet {
         // gets absolute path of the web application
         String appPath = request.getServletContext().getRealPath("");
         // constructs path of the directory to save uploaded file
-        String savePath = appPath + File.separator + SAVE_DIR;
+        String savePath = appPath + /*File.separator +*/ SAVE_DIR;
 
         // creates the save directory if it does not exists
         File fileSaveDir = new File(savePath);
@@ -79,26 +87,29 @@ public class UploadFileServlet extends HttpServlet {
             fileSaveDir.mkdir();
         }
 
-        String fileName = null;
+        List<UploadFile> listUploadFile = new ArrayList<>();
+
         String fileUUID = randomUUID().toString();
         for (Part part : request.getParts()) {
-            fileName = extractFileName(part);
+            String fileName = fileName = extractFileName(part);
             part.write(savePath + File.separator + fileUUID);
-        }
 
-        UploadFile uploadFile = new UploadFile();
-        uploadFile.setFileName(fileName);
-        uploadFile.setFilePath(savePath);
-        uploadFile.setFileUUID(fileUUID);
-        try {
-            uploadFile.setFileMd5(Utils.getDigest(new FileInputStream(new File(savePath + File.separator + fileUUID))));
-        } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(UploadFileServlet.class.getName()).log(Level.SEVERE, null, ex);
+            UploadFile uploadFile = new UploadFile();
+            uploadFile.setFileName(fileName);
+            uploadFile.setFilePath(savePath);
+            uploadFile.setFileUUID(fileUUID);
+            try {
+                uploadFile.setFileMd5(Utils.getDigest(new FileInputStream(new File(savePath + File.separator + fileUUID))));
+            } catch (NoSuchAlgorithmException ex) {
+                Logger.getLogger(UploadFileServlet.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            dao.add(uploadFile);
+
+            listUploadFile.add(uploadFile);
         }
-        dao.add(uploadFile);
 
         request.setAttribute("message", "Upload has been done successfully!");
-        request.setAttribute("uploadFile", uploadFile);
+        request.setAttribute("listUploadFile", listUploadFile);
         getServletContext().getRequestDispatcher("/WEB-INF/views/upload_result.jsp").forward(request, response);
     }
 

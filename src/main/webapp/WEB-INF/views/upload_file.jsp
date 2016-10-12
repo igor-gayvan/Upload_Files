@@ -15,7 +15,7 @@
     <center>
         <h1>File Upload</h1>
         <form method="post" enctype="multipart/form-data">
-            Select file to upload: <input type="file" name="file"  /><br />
+            Select file to upload: <input type="file" name="file"  multiple/><br />
             <br /> <input type="submit" value="Upload" />
         </form>
     </center>

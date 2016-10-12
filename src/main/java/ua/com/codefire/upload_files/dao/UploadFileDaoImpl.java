@@ -25,7 +25,15 @@ public class UploadFileDaoImpl implements IUploadFileDao {
     @Override
     public UploadFile getByFileUUID(String fileUUID) {
         EntityManager em = getEntityManager();
-        UploadFile uploadFile = em.createNamedQuery("File.findByFileUUID", UploadFile.class).setParameter("fileUUID", fileUUID).getSingleResult();
+        UploadFile uploadFile = em.createNamedQuery("UploadFile.findByFileUUID", UploadFile.class).setParameter("fileUUID", fileUUID).getSingleResult();
+        em.close();
+        return uploadFile;
+    }
+
+    @Override
+    public UploadFile getByFileId(int fileId) {
+        EntityManager em = getEntityManager();
+        UploadFile uploadFile = em.createNamedQuery("UploadFile.findByFileId", UploadFile.class).setParameter("fileId", fileId).getSingleResult();
         em.close();
         return uploadFile;
     }

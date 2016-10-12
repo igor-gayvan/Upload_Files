@@ -14,6 +14,8 @@ import ua.com.codefire.upload_files.dao.models.UploadFile;
 public interface IUploadFileDao {
 
     UploadFile getByFileUUID(String fileUUID);
+    
+    UploadFile getByFileId(int fileId);
 
     void add(UploadFile uploadFile);
 }
